@@ -1,0 +1,16 @@
+Package: phexpo
+Type: Package
+Title: Bi-directional enrichment analysis of phenotypes and chemicals
+Version: 1.0.0
+Author: Chris Hawthorne, Guillermo Lopez Campos
+Maintainer: Chris Hawthorne <chawthorne04@qub.ac.uk>
+Description: A package for phenotype and chemical enrichment of gene lists using data
+    from the Comparative Toxicogenomics Database and the Human Phenotype Ontology.
+License: MIT + file LICENSE
+LazyData: true
+Encoding: UTF-8
+Imports: dplyr,tibble,ggplot2,magrittr,rlang
+Depends: R (>= 2.10),shiny
+RoxygenNote: 6.1.1
+Suggests: 
+    testthat

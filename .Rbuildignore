@@ -1,0 +1,5 @@
+^MIT$
+^vignette and manual$
+^data-raw$
+^.*\.Rproj$
+^\.Rproj\.user$
