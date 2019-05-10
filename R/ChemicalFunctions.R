@@ -27,7 +27,7 @@ perfFishTestChemSingle <- function(cname, enrich_1S = TRUE){
   if (cname %in% unique(sym_tbl$synonym) == FALSE) {
     stop(paste0(cname," is not supported"))
   } else {
-    print(" ")
+    print("Chemical accepted")
   }
 
   #Enrichment - True or False
@@ -150,7 +150,7 @@ genelistfunction <- function(i){
   if (i %in% unique(sym_tbl$synonym) == FALSE) {
     stop(paste0(i," is not supported"))
   } else {
-    print(" ")
+    print("Chemical accepted")
   }
   #
   sym_tbl <- tibble::as_tibble(sym_tbl)
