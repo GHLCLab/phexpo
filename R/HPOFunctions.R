@@ -47,7 +47,7 @@ if ( length(pheno_HPO_Cap$HPO_Name) == 0) {
 } else {
   #Assign HPO Name
   HPO <- as.character(pheno_HPO_Cap$HPO_Name)
-  print(" ")
+  print("HPO term accepted")
 }
 
 
@@ -156,7 +156,7 @@ HPOlistfunction <- function(i){
   } else {
     #Assign HPO Name
     HPO <- as.character(pheno_HPO_Cap$HPO_Name)
-    print(" ")
+    print("HPO term accepted")
   }
 
 
