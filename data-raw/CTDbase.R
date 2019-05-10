@@ -489,7 +489,7 @@ Human_IDs #1,539,606
 Human_IDs$GeneSymbol <- as.character(Human_IDs$GeneSymbol) #To character
 Orthologs_COMPLETE_NG #35,429
 chem2gene_fin <- dplyr::bind_rows(Orthologs_COMPLETE_NG,Human_IDs)
-chem2gene_fin #1,539,606 + 35,429 = 1575032 #1,575,035
+chem2gene_fin #1,539,606 + 35,429 = 1575035 #1,575,035
 
 #summary
 summary(chem2gene_fin)
