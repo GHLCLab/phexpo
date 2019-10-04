@@ -46,11 +46,23 @@ sym_tbl_1 %>%
   mutate(count = str_count(Synonyms, "\\|")) %>%
   group_by(ChemicalID) %>%
   arrange(desc(count))
+
+sym_tbl_1 %>%
+  mutate(count = str_count(Synonyms, "\\|")) %>%
+  group_by(ChemicalID) %>%
+  filter(count == 2)
+
 #78 is our biggest number of synonyms for Acetylcysteine - 11022019
+#Need to separate by 79. Because | is one less the number of chemicals, 3 chemicals split by two |- 29052019
 sym_tbl_2 <- sym_tbl_1 %>%
   mutate(count = str_count(Synonyms, "\\|")) %>%
-   separate(Synonyms,paste0("Synonym",1:78) , sep = "\\|", extra="merge", fill="right") %>%
+   separate(Synonyms,paste0("Synonym",1:79) , sep = "\\|", extra="merge", fill="right") %>%
    rename(Synonym0 = X..ChemicalName)
+
+#Check separate worked correctly.
+sym_tbl_2 %>%
+  select(Synonym0,Synonym77:Synonym79) %>%
+  filter(Synonym0 == "Acetylcysteine")
 
 #Synonym0 as a character - to remove warning of "Warning message:
 #attributes are not identical across measure variables;
@@ -58,7 +70,7 @@ sym_tbl_2 <- sym_tbl_1 %>%
 sym_tbl_2$Synonym0 <- as.character(sym_tbl_2$Synonym0)
 
 sym_tbl_3 <- sym_tbl_2 %>%
-  gather(key = synonym_no ,value = synonym,Synonym0:Synonym78 ,na.rm = TRUE) %>%
+  gather(key = synonym_no ,value = synonym,Synonym0:Synonym79 ,na.rm = TRUE) %>%
   group_by(ChemicalID) %>%
   #mutate(number = str_extract(synonym_no,"\\d"))%>%
   arrange(desc(ChemicalID))
@@ -67,7 +79,7 @@ sym_tbl_3 <- sym_tbl_2 %>%
 sym_tbl_4 <- sym_tbl_3 %>%
   ungroup()
 
-#just needed to ungroup ! - 430512 rows to 63,868 rows
+#just needed to ungroup ! - 430513 rows to 63,869 rows
 #unselect count
 sym_tbl_5 <- sym_tbl_4 %>%
   filter(ChemicalID %in% unique(chem2gene$ChemicalID)) %>%
@@ -111,8 +123,8 @@ chem2gene %>%
 
 #################################################################################
 #Filter out duplicate synonyms in D000072317 - Polychlorinated Dibenzodioxins
-# sym_tbl_5 - 63,868
-# sym_tbl_6 - should be 63,864
+# sym_tbl_5 - 63,869
+# sym_tbl_6 - should be 63,865
 sym_removal <- sym_tbl_5 %>%
   filter(ChemicalID == "D000072317" & c(synonym == "2,3,7,8-Tetrachlorodibenzo-p-dioxin"  |
                                           synonym == "Dibenzo(b,e)(1,4)dioxin, 2,3,7,8-tetrachloro-"  |
@@ -123,7 +135,7 @@ sym_removal
 
 #anti_join - to remove the rows
 sym_tbl_6 <- anti_join(sym_tbl_5, sym_removal, by = c("ChemicalID", "synonym_no", "synonym"))
-#63,864
+#63,865
 ############Re-check for duplicate synonyms
 sym_tbl_6 %>%
   group_by(synonym) %>%
@@ -150,7 +162,7 @@ sym_tbl_6 %>%
   summarise(Number = n()) %>%
   arrange(desc(Number))
 
-#Remove duplicates - 63864 to 63818
+#Remove duplicates - 63865 to 63819
 sym_tbl_7 <- sym_tbl_6 %>%
   select(ChemicalID, synonym) %>%
   distinct()
@@ -165,7 +177,7 @@ sym_tbl_7 %>%
 sym_tbl <- as.data.frame(sym_tbl_7)
 summary(sym_tbl) #Summary - Looks fine
 glimpse(sym_tbl)
-nrow(sym_tbl) #63818
+nrow(sym_tbl) #63819
 head(sym_tbl)
 
 #use-data

@@ -9,8 +9,9 @@
 pheno2gene
 }
 \description{
-Dataset of phenotype and their gene associations. Original data set downloaded on 28-Feb-2019. Version 2019-02-12.
-Dataset has been filtered to only contain Phenotypic abnormality terms.
+Dataset of phenotype and their gene associations. Original dataset downloaded on 28-Feb-2019. Version 2019-02-12.
+Dataset has been filtered to only contain phenotypic abnormality terms. Generation of this dataset used the Human Phenotype Ontology OBO file (2019-02-12 version)
+and the R packages ontologyIndex, tibble, magrittr and dplyr.
 }
 \details{
 @format A data frame of 472,515 rows and 4 columns.

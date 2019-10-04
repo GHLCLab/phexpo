@@ -7,13 +7,13 @@
 perfFishTestChemMultiple(cname, enrich_1S = TRUE)
 }
 \arguments{
-\item{cname}{List of chemical characters}
+\item{cname}{List of chemical characters.}
 
-\item{enrich_1S}{Enrichment one-sided. Automatically set to true for enrichment, where the one-sided Fisher's exact is set to alternative = 'greater.'
-If enrich = FALSE, Fisher's exact is set to alternative = 'two.sided' for two-sided.}
+\item{enrich_1S}{Enrichment one-sided. Default set to true for enrichment, where the one-sided Fisher's exact is set to alternative = "greater."
+If enrich_1S = FALSE, Fisher's exact is set to alternative = "two.sided" for two-sided.}
 }
 \value{
-Dataframe with enrichment
+Tibble data frame with enrichment.
 }
 \description{
 Enriched HPO terms for multiple chemicals
@@ -23,8 +23,5 @@ Enrichment for multiple chemicals is a simplistic exploratory function, where we
 Chemical names and synonyms used are dependent on the chemical names within CTD.
 }
 \examples{
-\dontrun{
-x <- list("Chemical1","Chemical2","Chemical3")
-perfFishTestChemMultiple(x)
-}
+perfFishTestChemMultiple(list("bisphenol A","bisphenol F","bisphenol B"))
 }

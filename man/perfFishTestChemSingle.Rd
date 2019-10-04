@@ -7,13 +7,13 @@
 perfFishTestChemSingle(cname, enrich_1S = TRUE)
 }
 \arguments{
-\item{cname}{Chemical character}
+\item{cname}{Chemical character.}
 
-\item{enrich_1S}{Enrichment one-sided. Automatically set to true for enrichment, where the one-sided Fisher's exact is set to alternative = 'greater.'
+\item{enrich_1S}{Enrichment one-sided. Default set to true for enrichment, where the one-sided Fisher's exact is set to alternative = "greater."
 If enrich_1S = FALSE, Fisher's exact is set to alternative = "two.sided" for two-sided.}
 }
 \value{
-Dataframe with enrichment.
+Tibble data frame with enrichment.
 }
 \description{
 Enriched HPO terms for a single chemical's associated gene list

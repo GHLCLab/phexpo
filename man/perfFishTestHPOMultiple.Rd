@@ -7,13 +7,13 @@
 perfFishTestHPOMultiple(HPO, enrich_1S = TRUE)
 }
 \arguments{
-\item{HPO}{List of Human Phenotype Ontology terms}
+\item{HPO}{List of Human Phenotype Ontology terms characters}
 
-\item{enrich_1S}{Enrichment one-sided. Automatically set to true for enrichment, where the one-sided Fisher's exact is set to alternative = 'greater.'
-If enrich_1S = FALSE, Fisher's exact is set to alternative = 'two.sided' for two.sided.}
+\item{enrich_1S}{Enrichment one-sided. Default set to true for enrichment, where the one-sided Fisher's exact is set to alternative = "greater."
+If enrich_1S = FALSE, Fisher's exact is set to alternative = "two.sided" for two.sided.}
 }
 \value{
-Dataframe with enrichment.
+Tibble data frame with enrichment.
 }
 \description{
 Chemical enrichment for multiple phenotype terms
@@ -23,8 +23,7 @@ Chemical enrichment for multiple HPO terms is a simplistic exploratory function,
 HPO terms used should be phenotypic abnormality terms within the HPO release 2019-02-12.
 }
 \examples{
-\dontrun{
-x <- list("HPO term1","HPO term2","HPO term3")
-perfFishTestHPOMultiple(x)
-}
+perfFishTestHPOMultiple(list("Increased circulating ACTH level",
+"Androgen insufficiency",
+"Decreased circulating aldosterone level"))
 }

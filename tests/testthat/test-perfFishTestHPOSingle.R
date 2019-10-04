@@ -1,11 +1,11 @@
 library(testthat)
 context("perfFishTestHPOSingle")
 
-test_that("perfFishTestHPOSingle returns a tibble dataframe", {
+test_that("perfFishTestHPOSingle returns a tibble data frame", {
 expect_equal(class(perfFishTestHPOSingle(HPO = "Rickets",enrich_1S = TRUE)), c("tbl_df", "tbl", "data.frame"))
 })
 
-test_that("perfFishTestHPOSingle returns a tibble dataframe of 10 columns", {
+test_that("perfFishTestHPOSingle returns a tibble data frame of 10 columns", {
   expect_equal(ncol(perfFishTestHPOSingle(HPO = "Rickets",enrich_1S = TRUE)), 10)
 })
 
@@ -14,7 +14,7 @@ test_that("perfFishTestHPOSingle returns error for HPO not supported", {
 })
 
 
-test_that("perfFishTestHPOSingle returns error for enricH_1S isn't true", {
+test_that("perfFishTestHPOSingle returns error for enrich_1S isn't true", {
   expect_error(perfFishTestHPOSingle(HPO = "Rickets",enrich_1S = "ERROR"))
 })
 

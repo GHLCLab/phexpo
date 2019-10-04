@@ -1,11 +1,11 @@
 #SINGLE HPO TERMS
 
-#' Enriched Chemicals for a single phenotype term's associated gene list
+#' Enriched chemicals for a single phenotype term's associated gene list
 #'
-#' @param HPO Human Phenotype Ontology term
-#' @param enrich_1S Enrichment one-sided. Automatically set to true for enrichment, where the one-sided Fisher's exact is set to alternative = 'greater.'
-#' If enrich_1S = FALSE, Fisher's exact is set to alternative = 'two.sided' for two-sided.
-#' @return Dataframe with enrichment.
+#' @param HPO Human Phenotype Ontology term character.
+#' @param enrich_1S Enrichment one-sided. Default set to true for enrichment, where the one-sided Fisher's exact is set to alternative = "greater."
+#' If enrich_1S = FALSE, Fisher's exact is set to alternative = "two.sided" for two-sided.
+#' @return Tibble data frame with enrichment.
 #' @note HPO terms used should be phenotypic abnormality terms within the HPO release 2019-02-12.
 #' @examples
 #' perfFishTestHPOSingle("Rickets")
@@ -35,8 +35,6 @@ pheno_HPO_Cap <- pheno %>%
   dplyr::distinct() %>%
   dplyr::mutate(lowercase = tolower(.data$HPO_Name))
 
-#tail(pheno_HPO_Cap)
-
 #Look up proper HPO term
 pheno_HPO_Cap <- pheno_HPO_Cap %>%
   dplyr::filter(.data$lowercase == HPO_low)
@@ -62,9 +60,6 @@ if (enrich_1S == TRUE) {
 #Filter by selected HPO term
 selectedpheno <-pheno %>%
   dplyr::filter(.data$HPO_Name == HPO)
-#Filter by homosapiens removed (  #filter(Organism == "Homo sapiens") %>%) and genes contained in both datasets
-# chems <- chem2gene_tbl %>%
-#   dplyr::filter(.data$GeneID %in% genesannotate)
 
 #Create HPO term genelist
 genelist  <-  unique(selectedpheno$GeneID)
@@ -73,32 +68,51 @@ genelist  <-  unique(selectedpheno$GeneID)
 gl <- chem2gene_tbl %>%
   dplyr::filter(.data$GeneID %in% genelist)%>%
   dplyr::group_by(.data$X..ChemicalName) %>%
-  dplyr::select(.data$X..ChemicalName,.data$ChemicalID,.data$GeneID) %>%
+  dplyr::select(.data$X..ChemicalName,.data$GeneID) %>%
   dplyr::distinct() %>%  #remove duplicate genes
   dplyr::summarise(GL_YES = dplyr::n() ) %>%
   dplyr::mutate(TOTAL_GL = length(genelist)) %>%
   dplyr::arrange(dplyr::desc(.data$GL_YES)) %>%
   dplyr::mutate(GL_NO = .data$TOTAL_GL - .data$GL_YES)
 
-#Universe list
-# filter(Organism == "Homo sapiens") %>% removed and Organism no longer selected
-#filter(GeneID %in% genesannotate ) %>% removed
 
-ul <- chem2gene_tbl %>%
+#Not Genelist
+Not_Genelist <- chem2gene_tbl %>%
+  dplyr::filter(!.data$GeneID %in% genelist)
+
+#Not Genelist
+nl <- Not_Genelist %>%
   dplyr::group_by(.data$X..ChemicalName) %>%
-  dplyr::select(.data$X..ChemicalName,.data$ChemicalID,.data$GeneID) %>%
+  dplyr::select(.data$X..ChemicalName,.data$GeneID) %>%
   dplyr::distinct() %>%
-  dplyr::summarise(UL_YES = dplyr::n() ) %>%
-  dplyr::mutate(TOTAL_UL = length(unique(chem2gene_tbl$GeneID)))%>%
-  dplyr::arrange(dplyr::desc(.data$UL_YES)) %>%
-  dplyr::mutate(UL_NO = .data$TOTAL_UL - .data$UL_YES)
+  dplyr::summarise(NOT_GL_YES = dplyr::n() ) %>%
+  dplyr::mutate(TOTAL_NOT_GL = length(unique(Not_Genelist$GeneID)))%>%
+  dplyr::arrange(dplyr::desc(.data$NOT_GL_YES)) %>%
+  dplyr::mutate(NOT_GL_NO = .data$TOTAL_NOT_GL - .data$NOT_GL_YES)
+
+#Chemicals that have been filtered out because they do not have any genes in the not gene list
+#need to be re-added with a NOT_GL of 0 in nl
+chemical_addition <- chem2gene_tbl$X..ChemicalName[!chem2gene_tbl$X..ChemicalName %in% nl$X..ChemicalName]
+chemical_addition <- unique(chemical_addition) #just need the term once
+chemical_addition_2 <- tibble::enframe(chemical_addition)
+chemical_addition_2 <-   chemical_addition_2[,-1]
+colnames(chemical_addition_2) <- "X..ChemicalName"
+
+chemical_addition_3 <- chemical_addition_2 %>%
+  dplyr::mutate(NOT_GL_YES = 0,
+                TOTAL_NOT_GL = length(unique(Not_Genelist$GeneID)),
+                NOT_GL_NO = .data$TOTAL_NOT_GL - .data$NOT_GL_YES)
+
+#Bind the nl(Not_Genelist) and chemical_addition_3
+nl_2 <- dplyr::bind_rows(nl,chemical_addition_3 )
 
 #Join dataframes
 fl <- gl %>%
-  dplyr::left_join(ul, by = "X..ChemicalName")
+  dplyr::left_join(nl_2, by = "X..ChemicalName")
 
 
 #Fisher's exact test function
+#Attribution: https://stackoverflow.com/questions/28966840/fishers-test-stat-on-data-frame-using-dplyrmutate
 fishertest <- function(a,b,c,d){
   m <- matrix(c(a,b,c,d),nrow=2)
   p <- stats::fisher.test(m,alternative = side)$p.value
@@ -107,7 +121,7 @@ fishertest <- function(a,b,c,d){
 #Fisher's exact test p_value
 fl2 <- fl %>%
   dplyr::group_by(.data$X..ChemicalName)%>%
-  dplyr::mutate(p_value = fishertest(.data$GL_YES,.data$GL_NO,.data$UL_YES,.data$UL_NO))%>%
+  dplyr::mutate(p_value = fishertest(.data$GL_YES,.data$NOT_GL_YES,.data$GL_NO,.data$NOT_GL_NO))%>%
   dplyr::arrange(dplyr::desc(.data$p_value))%>%
   dplyr::ungroup()
 
@@ -117,6 +131,8 @@ fl2 <- fl2 %>%
   dplyr::mutate(FDR = stats::p.adjust(.data$p_value,"fdr")) %>%
   dplyr::arrange(.data$p_value)
 fl3 <- fl2
+#Change first column name
+colnames(fl3)[1] <- "Chemical_Name"
 fl3
 }
 
@@ -128,6 +144,7 @@ fl3
 HPOlistfunction <- function(i){
   chem2gene_tbl <- tibble::as_tibble(chem2gene)
   pheno2gene_tbl <- tibble::as_tibble(pheno2gene)
+  #Genes in both datasets
   genesannotate <- Reduce(base::intersect, list(pheno2gene$GeneID,chem2gene$GeneID))
 
   pheno <- pheno2gene_tbl %>%
@@ -144,8 +161,6 @@ HPOlistfunction <- function(i){
     dplyr::distinct() %>%
     dplyr::mutate(lowercase = tolower(.data$HPO_Name))
 
-  #tail(pheno_HPO_Cap)
-
   #Look up proper HPO term
   pheno_HPO_Cap <- pheno_HPO_Cap %>%
     dplyr::filter(.data$lowercase == HPO_low)
@@ -159,10 +174,10 @@ HPOlistfunction <- function(i){
     print("HPO term accepted")
   }
 
-
-  selectedpheno <-pheno %>%
+  #Filter by selected HPO term
+  selectedpheno <- pheno %>%
     dplyr::filter(.data$HPO_Name == HPO)
-
+  #Create HPO term genelist
   genelist <- unique(selectedpheno$GeneID)
 
 }
@@ -170,15 +185,14 @@ HPOlistfunction <- function(i){
 
 #' Chemical enrichment for multiple phenotype terms
 #'
-#' @param HPO List of Human Phenotype Ontology terms
-#' @param enrich_1S Enrichment one-sided. Automatically set to true for enrichment, where the one-sided Fisher's exact is set to alternative = 'greater.'
-#' If enrich_1S = FALSE, Fisher's exact is set to alternative = 'two.sided' for two.sided.
-#' @return Dataframe with enrichment.
+#' @param HPO List of Human Phenotype Ontology terms characters
+#' @param enrich_1S Enrichment one-sided. Default set to true for enrichment, where the one-sided Fisher's exact is set to alternative = "greater."
+#' If enrich_1S = FALSE, Fisher's exact is set to alternative = "two.sided" for two.sided.
+#' @return Tibble data frame with enrichment.
 #' @examples
-#' \dontrun{
-#' x <- list("HPO term1","HPO term2","HPO term3")
-#' perfFishTestHPOMultiple(x)
-#' }
+#' perfFishTestHPOMultiple(list("Increased circulating ACTH level",
+#' "Androgen insufficiency",
+#' "Decreased circulating aldosterone level"))
 #' @note Chemical enrichment for multiple HPO terms is a simplistic exploratory function, where we take an additive approach.
 #' HPO terms used should be phenotypic abnormality terms within the HPO release 2019-02-12.
 #' @export
@@ -195,62 +209,70 @@ perfFishTestHPOMultiple <- function(HPO, enrich_1S = TRUE){
 
   #Create a genelist
   agenelist <- lapply(HPO, HPOlistfunction)
-
-  unlist_agenelist <- unlist(agenelist)
-
-  #deduplicate
+  unlist_agenelist <- unlist(agenelist) #deduplicate
   genelist <-  unique(unlist_agenelist)
-  #show(genelist)
 
   #Genes contained in both datasets
   chem2gene_tbl <- tibble::as_tibble(chem2gene)
   genesannotate <- Reduce(base::intersect, list(pheno2gene$GeneID,chem2gene$GeneID))
 
-  #remove "Homo sapiens" -  #filter(Organism == "Homo sapiens") %>%
-
-  #Filter
-  # chems <- chem2gene_tbl %>%
-  #   dplyr::filter(.data$GeneID %in% genesannotate )
-
    #Genelist
   gl <- chem2gene_tbl %>%
     dplyr::filter(.data$GeneID %in% genelist)%>%
     dplyr::group_by(.data$X..ChemicalName) %>%
-    dplyr::select(.data$X..ChemicalName,.data$ChemicalID,.data$GeneID) %>%
+    dplyr::select(.data$X..ChemicalName,.data$GeneID) %>%
     dplyr::distinct() %>%  #remove duplicate genes
     dplyr::summarise(GL_YES = dplyr::n() ) %>%
     dplyr::mutate(TOTAL_GL = length(genelist)) %>%
     dplyr::arrange(dplyr::desc(.data$GL_YES)) %>%
     dplyr::mutate(GL_NO = .data$TOTAL_GL - .data$GL_YES)
 
-  #Universelist
-  #filter(Organism == "Homo sapiens") %>% and all organisms
-  #filter(GeneID %in% genesannotate ) %>%
+  #Not Genelist
+  Not_Genelist <- chem2gene_tbl %>%
+    dplyr::filter(!.data$GeneID %in% genelist)
 
-  ul <- chem2gene_tbl %>%
+  #Not Genelist
+  nl <- Not_Genelist %>%
     dplyr::group_by(.data$X..ChemicalName) %>%
-    dplyr::select(.data$X..ChemicalName,.data$ChemicalID,.data$GeneID) %>%
+    dplyr::select(.data$X..ChemicalName,.data$GeneID) %>%
     dplyr::distinct() %>%
-    dplyr::summarise(UL_YES = dplyr::n() ) %>%
-    dplyr::mutate(TOTAL_UL = length(unique(chem2gene_tbl$GeneID)))%>%
-    dplyr::arrange(dplyr::desc(.data$UL_YES)) %>%
-    dplyr::mutate(UL_NO = .data$TOTAL_UL - .data$UL_YES)
+    dplyr::summarise(NOT_GL_YES = dplyr::n() ) %>%
+    dplyr::mutate(TOTAL_NOT_GL = length(unique(Not_Genelist$GeneID)))%>%
+    dplyr::arrange(dplyr::desc(.data$NOT_GL_YES)) %>%
+    dplyr::mutate(NOT_GL_NO = .data$TOTAL_NOT_GL - .data$NOT_GL_YES)
+
+  #Chemicals that have been filtered out because they do not have any genes in the not gene list
+  #need to be re-added with a NOT_GL of 0 in nl
+  chemical_addition <- chem2gene_tbl$X..ChemicalName[!chem2gene_tbl$X..ChemicalName %in% nl$X..ChemicalName]
+  chemical_addition <- unique(chemical_addition) #just need the term once
+  chemical_addition_2 <- tibble::enframe(chemical_addition)
+  chemical_addition_2 <-   chemical_addition_2[,-1]
+  colnames(chemical_addition_2) <- "X..ChemicalName"
+
+  chemical_addition_3 <- chemical_addition_2 %>%
+    dplyr::mutate(NOT_GL_YES = 0,
+                  TOTAL_NOT_GL = length(unique(Not_Genelist$GeneID)),
+                  NOT_GL_NO = .data$TOTAL_NOT_GL - .data$NOT_GL_YES)
+
+  #Bind the nl(Not_Genelist) and chemical_addition_3
+  nl_2 <- dplyr::bind_rows(nl,chemical_addition_3 )
 
   #Join dataframes
   fl <- gl %>%
-    dplyr::left_join(ul, by = "X..ChemicalName")
+    dplyr::left_join(nl_2, by = "X..ChemicalName")
 
 
   #Fishers exact test
+  #Attribution: https://stackoverflow.com/questions/28966840/fishers-test-stat-on-data-frame-using-dplyrmutate
   fishertest <- function(a,b,c,d){
     m <- matrix(c(a,b,c,d),nrow=2)
     p <- stats::fisher.test(m,alternative = side)$p.value
   }
 
-  #P-value
+  #Fisher's exact test p_value
   fl2 <- fl %>%
     dplyr::group_by(.data$X..ChemicalName)%>%
-    dplyr::mutate(p_value = fishertest(.data$GL_YES,.data$GL_NO,.data$UL_YES,.data$UL_NO))%>%
+    dplyr::mutate(p_value = fishertest(.data$GL_YES,.data$NOT_GL_YES,.data$GL_NO,.data$NOT_GL_NO))%>%
     dplyr::arrange(dplyr::desc(.data$p_value))%>%
     dplyr::ungroup()
 
@@ -260,6 +282,8 @@ perfFishTestHPOMultiple <- function(HPO, enrich_1S = TRUE){
     dplyr::mutate(FDR = stats::p.adjust(.data$p_value,"fdr")) %>%
     dplyr::arrange(.data$p_value)
   fl3 <- fl2
+  #Change first column name
+  colnames(fl3)[1] <- "Chemical_Name"
   fl3
 }
 

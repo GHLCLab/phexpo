@@ -7,7 +7,7 @@
 visEnrich(x)
 }
 \arguments{
-\item{x}{Dataframe of enrichment data}
+\item{x}{Enrichment results tibble data frame.}
 }
 \value{
 Shiny app.
@@ -17,7 +17,7 @@ Enrichment visualisation
 }
 \examples{
 \dontrun{
-x <- perfFishTestHPOSingle("Iodine")
+x <- perfFishTestChemSingle("Iodine")
 visEnrich(x)}
 
 

@@ -9,18 +9,18 @@
 chem2gene
 }
 \description{
-Dataset of chemicals and their gene interactions. Original data set downloaded on 11-Feb-2019. Version Feb-05-2019.
+Dataset of chemicals and their gene interactions. Original dataset downloaded on 11-Feb-2019. Version Feb-05-2019.
 Dataset has been filtered to contain only the organisms Homo sapiens, Mus musculus, Rattus norvegicus,
 Rattus rattus, Danio rerio, Macaca fascicularis, Macaca mulatta and human gene IDs. Genes were checked that
-they belonged to humans using the Homo sapien gene info from NCBI (downloaded 19-March-2019).
+they belonged to humans using the Homo sapien gene info from National Center for Biotechnology Information (NCBI) (downloaded 19-March-2019).
 For gene IDs not belonging to Homo sapiens, gene IDs were checked that they belonged to their respective organism
 using All Mammalia gene info from NCBI (15-March-2019) and Danio rerio gene info from NCBI (15-March-2019).
-All orthologs for these gene IDs were found using NCBI Homologene (version 06-May-2014) and outdated ortholog gene IDs
-were updated to the latest gene ID using NCBI gene_history (15-March-2019) and updated gene symbols were taken from
-Homo sapien gene info.
+All orthologues for these gene IDs were found using NCBI Homologene (version 06-May-2014) and outdated orthologue gene IDs
+were updated to the latest gene ID using NCBI gene_history (15-March-2019) and updated gene symbols were retrieved from
+Homo sapien gene info. Tibble, dplyr, readr, tidyr, magrittr and annotationTools were used in the generation of this dataset.
 }
 \details{
-@format A data frame of 1,575,035 rows and 11 columns.
+@format A tibble data frame of 1,575,035 rows and 11 columns.
 
 
 

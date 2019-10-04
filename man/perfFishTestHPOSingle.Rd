@@ -2,21 +2,21 @@
 % Please edit documentation in R/HPOFunctions.R
 \name{perfFishTestHPOSingle}
 \alias{perfFishTestHPOSingle}
-\title{Enriched Chemicals for a single phenotype term's associated gene list}
+\title{Enriched chemicals for a single phenotype term's associated gene list}
 \usage{
 perfFishTestHPOSingle(HPO, enrich_1S = TRUE)
 }
 \arguments{
-\item{HPO}{Human Phenotype Ontology term}
+\item{HPO}{Human Phenotype Ontology term character.}
 
-\item{enrich_1S}{Enrichment one-sided. Automatically set to true for enrichment, where the one-sided Fisher's exact is set to alternative = 'greater.'
-If enrich_1S = FALSE, Fisher's exact is set to alternative = 'two.sided' for two-sided.}
+\item{enrich_1S}{Enrichment one-sided. Default set to true for enrichment, where the one-sided Fisher's exact is set to alternative = "greater."
+If enrich_1S = FALSE, Fisher's exact is set to alternative = "two.sided" for two-sided.}
 }
 \value{
-Dataframe with enrichment.
+Tibble data frame with enrichment.
 }
 \description{
-Enriched Chemicals for a single phenotype term's associated gene list
+Enriched chemicals for a single phenotype term's associated gene list
 }
 \note{
 HPO terms used should be phenotypic abnormality terms within the HPO release 2019-02-12.
